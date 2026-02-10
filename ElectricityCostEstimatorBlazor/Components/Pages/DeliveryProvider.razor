@@ -1,0 +1,64 @@
+﻿@page "/DeliveryProvider"
+@rendermode InteractiveServer
+
+@using ElectricityCostEstimatorBlazor.Services
+@using ElectricityCostEstimatorBlazor.ViewModels
+@using System.Threading.Tasks
+
+@inject ElectricityEstimatorService estimatorService;
+
+<h3>Delivery Provider</h3>
+
+<EditForm Model="@provider" OnValidSubmit="@OnSave">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <div>
+        <label for="DeliveryProviderName">Provider</label><br />
+        <InputText id="DeliveryProviderName" @bind-Value="@provider.ProviderName"></InputText>
+    </div>
+    <br />
+    <div>
+        <label for="DeliveryProviderMonthlyCharge">Monthly Charge</label><br />
+        <InputNumber id="DeliveryProviderMonthlyCharge" @bind-Value="@provider.MonthlyCharge"></InputNumber>
+    </div>
+    <br />
+    <div>
+    <label for="DeliveryProviderKWhCharge">kWh Charge</label><br />
+    <InputNumber id="DeliveryProviderKWhCharge" @bind-Value="@provider.KWhCharge"></InputNumber>
+    </div>
+    <br />
+    <button type="submit">Save</button>
+</EditForm>
+
+
+@code {
+    private int _providerId = 0;
+    private List<Data.Models.DeliveryProvider> providers;
+    private DeliveryProviderViewModel provider = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        providers = await estimatorService.GetAllDeliverProviders();
+        provider = providers.Where(provider => provider.Id == _providerId).Select(delivery => new DeliveryProviderViewModel
+        {
+            Id = delivery.Id,
+            ProviderName = delivery.ProviderName,
+            MonthlyCharge = delivery.MonthlyCharge,
+            KWhCharge = delivery.KWhCharge
+        }).FirstOrDefault() ?? new();
+    }
+
+    public async Task OnSave(EditContext editContext)
+    {
+        var providerViewModel = (DeliveryProviderViewModel)editContext.Model;
+        var provider = _providerId > 0 ? await estimatorService.GetDeliveryProviderById(_providerId) : new Data.Models.DeliveryProvider();
+
+        if (provider != null)
+        {
+            provider.ProviderName = providerViewModel.ProviderName;
+            provider.MonthlyCharge = providerViewModel.MonthlyCharge;
+            provider.KWhCharge = providerViewModel.KWhCharge;
+
+            await estimatorService.UpdateDeliveryProvider(provider);
+        }
+    }
+}
