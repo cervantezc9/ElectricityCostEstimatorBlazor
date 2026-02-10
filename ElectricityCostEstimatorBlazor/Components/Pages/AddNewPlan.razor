@@ -1,0 +1,33 @@
+﻿@page "/AddNewPlan"
+@rendermode InteractiveServer
+
+<h3>Add New Electricity Plan</h3>
+
+@if (ComponentName.Equals("DeliveryProvider", StringComparison.OrdinalIgnoreCase))
+{
+    <DeliveryProvider OnNextClick=@GoToNextStep></DeliveryProvider>
+}
+else if (ComponentName == "ElectricityPlan")
+{
+    <ElectricityPlan OnNextClick="@GoToNextStep"></ElectricityPlan>
+}
+
+@code {
+    private int providerId { get; set; } = 0;
+    private int electricityPlanId { get; set; } = 0;
+    private string ComponentName { get; set; } = "DeliveryProvider";
+
+    public async Task GoToNextStep(object Id)
+    {
+        if (ComponentName.Equals("DeliveryProvider", StringComparison.OrdinalIgnoreCase))
+        {
+            providerId = (int)Id;
+            ComponentName = "ElectricityPlan";
+        }
+        else if (ComponentName.Equals("ElectricityPlan", StringComparison.OrdinalIgnoreCase))
+        {
+            electricityPlanId = (int)Id;
+            ComponentName = "ElectricityPlanRates";
+        }
+    }
+}

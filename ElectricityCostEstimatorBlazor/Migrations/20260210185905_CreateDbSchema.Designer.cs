@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ElectricityCostEstimatorBlazor.Migrations
 {
     [DbContext(typeof(ElectricityDbContext))]
-    [Migration("20260210044417_AddedDataAnnonationToDataModels")]
-    partial class AddedDataAnnonationToDataModels
+    [Migration("20260210185905_CreateDbSchema")]
+    partial class CreateDbSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

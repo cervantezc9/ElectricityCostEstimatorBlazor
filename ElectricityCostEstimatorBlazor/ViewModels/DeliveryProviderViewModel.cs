@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ElectricityCostEstimatorBlazor.ViewModels
 {
@@ -9,8 +8,15 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
 
         [Required]
         public string ProviderName { get; set; }
+
+
+        [Required]
         public double MonthlyCharge { get; set; }
+
+
+        [Required]
         public double KWhCharge { get; set; }
+
         public string Description { get => $"{this.Id} - {this.ProviderName}"; }
     }
 }

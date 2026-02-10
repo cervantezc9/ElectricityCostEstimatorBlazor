@@ -1,5 +1,4 @@
-﻿@page "/DeliveryProvider"
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 
 @using ElectricityCostEstimatorBlazor.Services
 @using ElectricityCostEstimatorBlazor.ViewModels
@@ -7,58 +6,108 @@
 
 @inject ElectricityEstimatorService estimatorService;
 
-<h3>Delivery Provider</h3>
+<div class="row">
+    <div class="col-12">
+        <div class="col-sm-12 col-md-9">
+            <label for="DeliveryProviderSelect" class="form-label">Provider</label>
+            <InputSelect id="DeliveryProviderSelect" TValue="int" Value="_providerId" ValueChanged="OnProviderChanged" ValueExpression="@(() => _providerId)" class="form-control col-sm-12 col-6">
+                <option value="0">- Add New Provider -</option>
+                @foreach(var provider in Providers)
+                {
+                    <option value="@provider.Id">@provider.Description</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+</div>
 
-<EditForm Model="@provider" OnValidSubmit="@OnSave">
-    <DataAnnotationsValidator></DataAnnotationsValidator>
-    <div>
-        <label for="DeliveryProviderName">Provider</label><br />
-        <InputText id="DeliveryProviderName" @bind-Value="@provider.ProviderName"></InputText>
+<div class="row">
+    <div class="m-3 col-9 border rounded">
+        <EditForm Model="@Provider" OnValidSubmit="@OnSave">
+            <fieldset disabled="@IsProviderDiabled">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+                <div class="col-sm-12 m-3 col-md-9">
+                    <label for="DeliveryProviderName" class="form-label">Provider Name</label><br />
+                    <InputText id="DeliveryProviderName" class="form-control" @bind-Value="@Provider.ProviderName"></InputText>
+                </div>
+                <div class="col-sm-12 m-3 col-md-4">
+                    <label for="DeliveryProviderMonthlyCharge" class="form-label">Monthly Charge</label><br />
+                    <InputNumber id="DeliveryProviderMonthlyCharge" class="form-control col-sm-12 col-4" @bind-Value="@Provider.MonthlyCharge"></InputNumber>
+                </div>
+                <div class="col-sm-12 m-3 col-md-4">
+                    <label for="DeliveryProviderKWhCharge" class="form-label">Per kWh Charge</label><br />
+                    <InputNumber id="DeliveryProviderKWhCharge" class="form-control col-sm-12 col-4" @bind-Value="@Provider.KWhCharge"></InputNumber>
+                </div>
+                <button type="submit" hidden="@IsProviderDiabled" class="m-3 @(IsProviderDiabled ? "btn" : "btn btn-primary")">Save</button>
+            </fieldset>
+        </EditForm>
     </div>
-    <br />
-    <div>
-        <label for="DeliveryProviderMonthlyCharge">Monthly Charge</label><br />
-        <InputNumber id="DeliveryProviderMonthlyCharge" @bind-Value="@provider.MonthlyCharge"></InputNumber>
+    <div class="col-3">
+        <button type="button" hidden=@(!IsProviderDiabled) class="m-3 btn btn-primary" @onclick="GoToNextStep">Next</button>
     </div>
-    <br />
-    <div>
-    <label for="DeliveryProviderKWhCharge">kWh Charge</label><br />
-    <InputNumber id="DeliveryProviderKWhCharge" @bind-Value="@provider.KWhCharge"></InputNumber>
-    </div>
-    <br />
-    <button type="submit">Save</button>
-</EditForm>
-
+</div>
 
 @code {
     private int _providerId = 0;
-    private List<Data.Models.DeliveryProvider> providers;
-    private DeliveryProviderViewModel provider = new();
+    private List<DeliveryProviderViewModel> Providers { get; set; } = [];
+    private DeliveryProviderViewModel Provider { get; set; } = new();
+    private bool IsProviderDiabled => _providerId != 0; 
+
+    [Parameter]
+    public EventCallback<object> OnNextClick { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        providers = await estimatorService.GetAllDeliverProviders();
-        provider = providers.Where(provider => provider.Id == _providerId).Select(delivery => new DeliveryProviderViewModel
+        var dbProviders = await estimatorService.GetAllDeliverProviders();
+        Providers = dbProviders.Select(provider => new DeliveryProviderViewModel
         {
-            Id = delivery.Id,
-            ProviderName = delivery.ProviderName,
-            MonthlyCharge = delivery.MonthlyCharge,
-            KWhCharge = delivery.KWhCharge
-        }).FirstOrDefault() ?? new();
+            Id = provider.Id,
+            ProviderName = provider.ProviderName,
+            MonthlyCharge = provider.MonthlyCharge,
+            KWhCharge = provider.KWhCharge
+        }).ToList();
+        Provider = Providers.FirstOrDefault(provider => provider.Id == _providerId) ?? new();
     }
 
     public async Task OnSave(EditContext editContext)
     {
         var providerViewModel = (DeliveryProviderViewModel)editContext.Model;
-        var provider = _providerId > 0 ? await estimatorService.GetDeliveryProviderById(_providerId) : new Data.Models.DeliveryProvider();
+        var provider = _providerId == 0 ? new Data.Models.DeliveryProvider()
+        {
+            ProviderName = providerViewModel.ProviderName,
+            MonthlyCharge = providerViewModel.MonthlyCharge,
+            KWhCharge = providerViewModel.KWhCharge,
+            IsActive = true
+        } : null;
 
         if (provider != null)
         {
-            provider.ProviderName = providerViewModel.ProviderName;
-            provider.MonthlyCharge = providerViewModel.MonthlyCharge;
-            provider.KWhCharge = providerViewModel.KWhCharge;
+            int? newProviderId = await estimatorService.AddDeliveryProvider(provider);
+            var dbProviders = await estimatorService.GetAllDeliverProviders();
 
-            await estimatorService.UpdateDeliveryProvider(provider);
+            Providers = dbProviders.Select(provider => new DeliveryProviderViewModel
+            {
+                Id = provider.Id,
+                ProviderName = provider.ProviderName,
+                MonthlyCharge = provider.MonthlyCharge,
+                KWhCharge = provider.KWhCharge,
+            }).ToList();
+
+            _providerId = newProviderId ?? 0;
+        }
+    }
+
+    public async Task OnProviderChanged(int id)
+    {
+        _providerId = id;
+        Provider = Providers.FirstOrDefault(provider => provider.Id == _providerId) ?? new();
+    }
+
+    public async Task GoToNextStep()
+    {
+        if (_providerId != 0)
+        {
+            await OnNextClick.InvokeAsync(_providerId);
         }
     }
 }

@@ -1,6 +1,40 @@
 ﻿@page "/"
 
+@using ElectricityCostEstimatorBlazor.Services
+@using ElectricityCostEstimatorBlazor.ViewModels
+
+@inject ElectricityEstimatorService estimatorService;
+
 <PageTitle>Home</PageTitle>
 
 <h1>Electricity Cost Estimator</h1>
 
+<div>
+    <label for="Estimate" class="col-sm-2">
+        Estimate
+    </label>
+    <div class="col-sm-4">
+        @* <InputSelect id="Estimate" @bind-Value="">
+
+        </InputSelect> *@
+    </div>
+</div>
+
+@code{
+    private int _estimateId = 0;
+    private EstimateViewModel Estimate { get; set; } = new();
+    private List<EstimateViewModel> Estimates { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Estimates = await estimatorService.GetAllEstimates().Result.Select(estimate => new EstimateViewModel()
+        // {
+        //     Id = estimate.Id,
+        //     Delivery = new()
+        //     {
+        //         ProviderName = estimate.Delivery?.ProviderName
+        //     }
+
+        // });
+    }
+}

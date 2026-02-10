@@ -101,18 +101,34 @@ namespace ElectricityCostEstimatorBlazor.Services
             return deliveryProvider;
         }
 
-        public async Task UpdateDeliveryProvider(DeliveryProvider provider)
+        public async Task<int?> AddDeliveryProvider(DeliveryProvider provider)
         {
             using (var context = _dbContextFactory.CreateDbContext())
             {
                 context.Deliveries.Update(provider);
                 await context.SaveChangesAsync();
+
+                return provider.Id;
             }
         }
 
         #endregion
 
         #region Electricity Plan
+
+        public async Task<List<ElectricityPlan>> GetAllElectricityPlans()
+        {
+            List<ElectricityPlan> plans = [];
+
+            using (var context = _dbContextFactory.CreateDbContext())
+            {
+                plans = await context.ElectricityPlans
+                    .Include(plan => plan.ElectricityPlanRates)
+                    .Where(plan => plan.IsActive).ToListAsync();
+            }
+
+            return plans;
+        }
 
         public async Task<ElectricityPlan> GetElectricityPlanById(int electricityPlanId)
         {
@@ -132,6 +148,17 @@ namespace ElectricityCostEstimatorBlazor.Services
 
             return electricityPlan;
         }
+        public async Task<int?> AddElectricityPlan(ElectricityPlan plan)
+        {
+            using (var context = _dbContextFactory.CreateDbContext())
+            {
+                context.ElectricityPlans.Update(plan);
+                await context.SaveChangesAsync();
+
+                return plan.Id;
+            }
+        }
+
 
         #endregion
 

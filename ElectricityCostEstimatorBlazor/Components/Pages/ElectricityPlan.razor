@@ -1,0 +1,169 @@
+﻿@using ElectricityCostEstimatorBlazor.Services
+@using ElectricityCostEstimatorBlazor.ViewModels
+
+@rendermode InteractiveServer
+
+@inject ElectricityEstimatorService estimatorService;
+
+<div class="row">
+    <div class="col-12">
+        <div class="col-sm-12 col-md-9">
+            <label for="ElectricityPlanSelect" class="form-label">Electricity Plan</label>
+            <InputSelect id="ElectricityPlanSelect" TValue="int" Value="_planId" ValueChanged="OnElectricityPlanChanged" ValueExpression="@(() => _planId)" class="form-control col-sm-12 col-6">
+                <option value="0">- Add New Plan -</option>
+                @foreach (var plan in Plans)
+                {
+                    <option value="@plan.Id">@plan.Description</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="m-3 col-9 border rounded">
+        <EditForm Model="@Plan" OnValidSubmit="@OnElectricityPlanSave">
+            <fieldset disabled="@IsPlanDisabled">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+                <div class="col-sm-12 m-3 col-md-9">
+                    <label for="ElectricityPlanName" class="form-label">Plan Name</label><br />
+                    <InputText id="ElectricityPlanName" class="form-control" @bind-Value="@Plan.Name"></InputText>
+                </div>
+                <div class="col-sm-12 m-3 col-md-4">
+                    <label for="ElectricityPlanBaseCharge" class="form-label">Base Charge</label><br />
+                    <InputNumber id="ElectricityPlanBaseCharge" class="form-control col-sm-12 col-4" @bind-Value="@Plan.BaseCharge"></InputNumber>
+                </div>
+                <div class="col-sm-12 m-3 col-md-4">
+                    <label for="ElectricityPlanCredit" class="form-label">Credit</label><br />
+                    <InputNumber id="ElectricityPlanCredit" class="form-control col-sm-12 col-4" @bind-Value="@Plan.Credit"></InputNumber>
+                </div>
+                <div class="col-sm-12 m-3 col-md-4">
+                    <label for="ElectricityPlanCreditMinimumUsage" class="form-label">Credit Minimum Usage</label><br />
+                    <InputNumber id="ElectricityPlanCreditMinimumUsage" class="form-control col-sm-12 col-4" @bind-Value="@Plan.CreditMinimumUsage"></InputNumber>
+                </div>
+
+                <div class="col-12 border rounded">
+                    @foreach(var rate in Plan.ElectricityPlanRates.Take(3))
+                    {
+                        <div class="row">
+                            <div class="col-sm-12 m-3 col-md-3">
+                                <label for="@($"ElectricityPlanRate-{rate.Id}")" class="form-label">Rate</label><br />
+                                <InputNumber id="@($"ElectricityPlanRate-{rate.Id}")" class="form-control col-sm-12 col-md-4" @bind-Value="@rate.Rate"></InputNumber>
+                            </div>
+                            <div class="col-sm-12 m-3 col-md-3">
+                                <label for="@($"ElectricityPlanMinkWh-{rate.Id}")" class="form-label">Min kWh</label><br />
+                                <InputNumber id="@($"ElectricityPlanMinkWh-{rate.Id}")" class="form-control col-sm-12 col-md-4" @bind-Value="@rate.kWhMinimumUsage"></InputNumber>
+                            </div>
+                            <div class="col-sm-12 m-3 col-md-3">
+                                <label for="@($"ElectricityPlanMaxkWh-{rate.Id}")" class="form-label">Max kWh</label><br />
+                                <InputNumber id="@($"ElectricityPlanMaxkWh-{rate.Id}")" class="form-control col-sm-12 col-md-4" @bind-Value="@rate.kWhMaximumUsage"></InputNumber>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button type="submit" hidden="@IsPlanDisabled" class="m-3 @(IsPlanDisabled ? "btn" : "btn btn-primary")">Save</button>
+            </fieldset>
+        </EditForm>
+    </div>
+    <div class="col-3">
+        <button type="button" hidden=@(!IsPlanDisabled) class="m-3 btn btn-primary" @onclick="GoToNextStep">Next</button>
+    </div>
+</div>
+
+
+@code {
+    private int _planId = 0;
+    private List<ElectricityPlanViewModel> Plans { get; set; } = [];
+    private ElectricityPlanViewModel Plan { get; set; } = new();
+    private bool IsPlanDisabled => _planId != 0;
+
+    [Parameter]
+    public EventCallback<object> OnNextClick { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var dbPlans = await estimatorService.GetAllElectricityPlans();
+        Plans = dbPlans.Select(plan => new ElectricityPlanViewModel
+        {
+            Id = plan.Id,
+            Name = plan.Name,
+            BaseCharge = plan.BaseCharge,
+            Credit = plan.Credit,
+            CreditMinimumUsage = plan.CreditMinimumUsage,
+            ElectricityPlanRates = plan.ElectricityPlanRates?.Take(3).Select(rate => new ElectricityPlanRate
+            {
+                Id = rate.Id,
+                Rate = rate.Rate,
+                kWhMinimumUsage = rate.kWhMinimumUsage,
+                kWhMaximumUsage = rate.kWhMaximumUsage,
+            }).ToList() ?? []
+        }).ToList();
+        Plan = Plans.FirstOrDefault(plan => plan.Id == _planId) ?? new();
+
+        if (Plan.ElectricityPlanRates.Count < 3)
+        {
+            for (int index = Plan.ElectricityPlanRates.Count; index < 3; index++)
+            {
+                Plan.ElectricityPlanRates.Add(new());
+            }
+        }
+    }
+
+    public async Task OnElectricityPlanSave(EditContext editContext)
+    {
+        var planVieModel = (ElectricityPlanViewModel)editContext.Model;
+        var plan = _planId == 0 ? new Data.Models.ElectricityPlan()
+        {
+            Name = planVieModel.Name,
+            BaseCharge = planVieModel.BaseCharge,
+            Credit = planVieModel.Credit,
+            CreditMinimumUsage = planVieModel.CreditMinimumUsage
+        } : null;
+
+        if (plan != null)
+        {
+            int? newPlanId = await estimatorService.AddElectricityPlan(plan);
+            var dbPlans = await estimatorService.GetAllElectricityPlans();
+
+            Plans = dbPlans.Select(plan => new ElectricityPlanViewModel
+            {
+                Id = plan.Id,
+                Name = plan.Name,
+                BaseCharge = plan.BaseCharge,
+                Credit = plan.Credit,
+                CreditMinimumUsage = plan.CreditMinimumUsage,
+                ElectricityPlanRates = plan.ElectricityPlanRates?.Take(3).Select(rate => new ElectricityPlanRate
+                {
+                    Id = rate.Id,
+                    Rate = rate.Rate,
+                    kWhMinimumUsage = rate.kWhMinimumUsage,
+                    kWhMaximumUsage = rate.kWhMaximumUsage
+                }).ToList() ?? []
+            }).ToList();
+
+            _planId = newPlanId ?? 0;
+        }
+    }
+
+    public async Task OnElectricityPlanChanged(int id)
+    {
+        _planId = id;
+        Plan = Plans.FirstOrDefault(plan => plan.Id == _planId) ?? new();
+
+        if (Plan.ElectricityPlanRates.Count < 3)
+        {
+            for (int index = Plan.ElectricityPlanRates.Count; index < 3; index++)
+            {
+                Plan.ElectricityPlanRates.Add(new());
+            }
+        }
+    }
+
+    public async Task GoToNextStep()
+    {
+        if (_planId != 0)
+        {
+            await OnNextClick.InvokeAsync(_planId);
+        }
+    }
+}
