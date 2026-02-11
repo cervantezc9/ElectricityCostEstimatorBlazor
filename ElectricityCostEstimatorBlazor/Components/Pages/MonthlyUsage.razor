@@ -1,0 +1,71 @@
+﻿@using ElectricityCostEstimatorBlazor.Data.Models
+@using ElectricityCostEstimatorBlazor.Services
+@using ElectricityCostEstimatorBlazor.ViewModels
+
+@rendermode InteractiveServer
+
+@inject ElectricityEstimatorService estimatorService;
+
+<div class="col-12 ">
+    <EditForm Model="@UsagesViewModel" class="col-12" OnValidSubmit="@OnMonthlyUsageSave">
+        <fieldset>
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <div class="container">
+                <div class="row row-cols-3 border rounded">
+                    @foreach(var usage in UsagesViewModel.MonthlyUsages)
+                    {
+                        <div class="col col-sm-12 col-md-3 m-3">
+                            <label for="@($"MonthlyUsage-{usage.Id}")" class="form-label">@(((Month)usage.Month).ToString())</label><br />
+                            <InputNumber id="@($"MonthlyUsage-{usage.Id}")" class="form-control" @bind-Value="@usage.Usage"></InputNumber>
+                        </div>
+                    }
+                </div>
+                <button type="submit" class="m-3 btn btn-primary">Save</button>
+            </div>
+        </fieldset>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public int ElectricityPlanId { get; set; }
+
+    [Parameter]
+    public int DeliveryProviderId { get; set; }
+
+    [Parameter]
+    public EventCallback<object> OnNextClick { get; set; }
+
+    private int _estimateId { get; set; } = 0;
+    private MonthlyUsageViewModel UsagesViewModel { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var months = Enum.GetValues(typeof(Month)).Cast<Month>()
+            .Select(month => (int)month).ToList();
+
+        foreach (var month in months)
+        {
+            UsagesViewModel.MonthlyUsages.Add(new() { Month = month });
+        }
+    }
+
+    public async Task OnMonthlyUsageSave(EditContext editContext)
+    {
+        var usageViewModel = (MonthlyUsageViewModel)editContext.Model;
+        var estimate = new Estimate()
+        {
+            IsActive = true,
+            ElectricityPlanId = ElectricityPlanId,
+            DeliveryId = DeliveryProviderId,
+            MonthlyUsages = usageViewModel.MonthlyUsages.Select(usage => new Data.Models.MonthlyUsage()
+            {
+                Month = (Month)usage.Month,
+                Usage = usage.Usage
+            }).ToList()
+        };
+
+        _estimateId = await estimatorService.AddEstimate(estimate) ?? 0;
+        await OnNextClick.InvokeAsync(_estimateId);
+    }
+}

@@ -16,12 +16,14 @@ namespace ElectricityCostEstimatorBlazor.Services
 
         #region Estimate
 
-        public async Task AddEstimate(Estimate estimate)
+        public async Task<int?> AddEstimate(Estimate estimate)
         {
             using (var context = _dbContextFactory.CreateDbContext())
             {
-                context.Estimates.Add(estimate);
+                context.Estimates.Update(estimate);
                 await context.SaveChangesAsync();
+
+                return estimate.Id;
             }
         }
 
@@ -53,20 +55,25 @@ namespace ElectricityCostEstimatorBlazor.Services
 
             using (var context = _dbContextFactory.CreateDbContext())
             {
-                estimate = await context.Estimates.FirstOrDefaultAsync(est => est.Id == estimateId);
+                estimate = await context.Estimates
+                    .Include(est => est.ElectricityPlan)
+                        .ThenInclude(plan => plan.ElectricityPlanRates)
+                    .Include(est => est.Delivery)
+                    .Include(est => est.MonthlyUsages)
+                    .FirstOrDefaultAsync(est => est.Id == estimateId);
             }
 
             return estimate;
         }
 
-        public async Task UpdateEstimate(Estimate estimate)
-        {
-            using (var context = _dbContextFactory.CreateDbContext())
-            {
-                context.Estimates.Update(estimate);
-                await context.SaveChangesAsync();
-            }
-        }
+        //public async Task UpdateEstimate(Estimate estimate)
+        //{
+        //    using (var context = _dbContextFactory.CreateDbContext())
+        //    {
+        //        context.Estimates.Update(estimate);
+        //        await context.SaveChangesAsync();
+        //    }
+        //}
 
         #endregion
 
@@ -78,7 +85,9 @@ namespace ElectricityCostEstimatorBlazor.Services
 
             using (var context = _dbContextFactory.CreateDbContext())
             {
-                providers = await context.Deliveries.AsNoTracking().Where(delivery => delivery.IsActive).OrderBy(delivery => delivery.Id).ToListAsync();
+                providers = await context.Deliveries.AsNoTracking()
+                    .Where(delivery => delivery.IsActive)
+                    .OrderBy(delivery => delivery.Id).ToListAsync();
             }
 
             return providers;
@@ -122,7 +131,7 @@ namespace ElectricityCostEstimatorBlazor.Services
 
             using (var context = _dbContextFactory.CreateDbContext())
             {
-                plans = await context.ElectricityPlans
+                plans = await context.ElectricityPlans.AsNoTracking()
                     .Include(plan => plan.ElectricityPlanRates)
                     .Where(plan => plan.IsActive).ToListAsync();
             }
@@ -148,6 +157,7 @@ namespace ElectricityCostEstimatorBlazor.Services
 
             return electricityPlan;
         }
+
         public async Task<int?> AddElectricityPlan(ElectricityPlan plan)
         {
             using (var context = _dbContextFactory.CreateDbContext())
@@ -162,26 +172,26 @@ namespace ElectricityCostEstimatorBlazor.Services
 
         #endregion
 
-        #region Electricity Plan Rate
+        //#region Electricity Plan Rate
 
-        public async Task<List<ElectricityPlanRate>> GetElectricityPlanRateByPlanId(int electricityPlanId)
-        {
-            if (electricityPlanRateId == 0)
-            {
-                return null;
-            }
+        //public async Task<List<ElectricityPlanRate>> GetElectricityPlanRateByPlanId(int electricityPlanId)
+        //{
+        //    if (electricityPlanRateId == 0)
+        //    {
+        //        return null;
+        //    }
 
-            List<ElectricityPlanRate> rates;
+        //    List<ElectricityPlanRate> rates;
 
-            using (var context = _dbContextFactory.CreateDbContext())
-            {
-                rates = await context.ElectricityPlanRates.Where(rate => rate.ElectricityPlanId == electricityPlanRateId).ToListAsync();
-            }
+        //    using (var context = _dbContextFactory.CreateDbContext())
+        //    {
+        //        rates = await context.ElectricityPlanRates.Where(rate => rate.ElectricityPlanId == electricityPlanRateId).ToListAsync();
+        //    }
 
-            return rates;
-        }
+        //    return rates;
+        //}
 
-        #endregion
+        //#endregion
 
         #region MonthlyUsage
 
@@ -196,7 +206,10 @@ namespace ElectricityCostEstimatorBlazor.Services
 
             using (var context = _dbContextFactory.CreateDbContext())
             {
-                monthlyUsages = await context.MonthlyUsages.Where(usage => usage.EstimateId == estimateId).ToListAsync();
+                monthlyUsages = await context.MonthlyUsages
+                    .Where(usage => usage.EstimateId == estimateId)
+                    .OrderBy(usage => usage.Month)
+                    .ToListAsync();
             }
 
             return monthlyUsages;

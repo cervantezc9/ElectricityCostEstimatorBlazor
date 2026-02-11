@@ -7,14 +7,25 @@
 {
     <DeliveryProvider OnNextClick=@GoToNextStep></DeliveryProvider>
 }
-else if (ComponentName == "ElectricityPlan")
+else if (ComponentName.Equals("ElectricityPlan", StringComparison.OrdinalIgnoreCase))
 {
     <ElectricityPlan OnNextClick="@GoToNextStep"></ElectricityPlan>
+}
+else if (ComponentName.Equals("MonthlyUsage", StringComparison.OrdinalIgnoreCase))
+{
+    <MonthlyUsage DeliveryProviderId="@providerId" ElectricityPlanId="@electricityPlanId" OnNextClick="@GoToNextStep"></MonthlyUsage>
+}
+else
+{
+    <div class="col-12">
+        <p>The electricity plan was added successfully. Return to the home page to view the estimate cost.</p>
+    </div>
 }
 
 @code {
     private int providerId { get; set; } = 0;
     private int electricityPlanId { get; set; } = 0;
+    private int estimateId { get; set; } = 0;
     private string ComponentName { get; set; } = "DeliveryProvider";
 
     public async Task GoToNextStep(object Id)
@@ -27,7 +38,12 @@ else if (ComponentName == "ElectricityPlan")
         else if (ComponentName.Equals("ElectricityPlan", StringComparison.OrdinalIgnoreCase))
         {
             electricityPlanId = (int)Id;
-            ComponentName = "ElectricityPlanRates";
+            ComponentName = "MonthlyUsage";
+        }
+        else if (ComponentName.Equals("MonthlyUsage", StringComparison.OrdinalIgnoreCase))
+        {
+            estimateId = (int)Id;
+            ComponentName = string.Empty;
         }
     }
 }

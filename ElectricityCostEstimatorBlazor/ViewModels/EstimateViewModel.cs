@@ -29,7 +29,7 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
             AnnualTotal = 0;
             foreach (var monthlyUsage in MonthlyUsages)
             {
-                AnnualTotal += GetChargeTotal(monthlyUsage.Month);
+                AnnualTotal += GetChargeTotal((Month)monthlyUsage.Month);
             }
             return AnnualTotal;
         }
@@ -37,7 +37,7 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
         public double GetDeliveryCharge(Month month)
         {
             double delvieryCharge = Delivery?.MonthlyCharge ?? 0;
-            MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == month);
+            MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == (int)month);
 
             delvieryCharge += ((Delivery?.KWhCharge ?? 0) / 100) * (monthlyUsage?.Usage ?? 0);
 
@@ -47,7 +47,7 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
         public double GetCredit(Month month)
         {
             double credit = 0;
-            MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == month);
+            MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == (int)month);
 
             if ((monthlyUsage?.Usage ?? 0) >= (ElectricityPlan?.CreditMinimumUsage ?? 0))
             {
@@ -59,7 +59,7 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
 
         public double GetUsageCharge(Month month)
         {
-            MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == month);
+            MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == (int)month);
             double charge = ElectricityPlan?.BaseCharge ?? 0;
 
             if (monthlyUsage != null)
