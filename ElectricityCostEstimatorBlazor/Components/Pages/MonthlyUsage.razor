@@ -7,6 +7,7 @@
 @inject ElectricityEstimatorService estimatorService;
 
 <div class="col-12 ">
+    <label class="form-label">Monthly Usages (kWh)</label>
     <EditForm Model="@UsagesViewModel" class="col-12" OnValidSubmit="@OnMonthlyUsageSave">
         <fieldset>
             <DataAnnotationsValidator></DataAnnotationsValidator>
@@ -61,7 +62,8 @@
             MonthlyUsages = usageViewModel.MonthlyUsages.Select(usage => new Data.Models.MonthlyUsage()
             {
                 Month = (Month)usage.Month,
-                Usage = usage.Usage
+                Usage = usage.Usage,
+                IsActive = true
             }).ToList()
         };
 

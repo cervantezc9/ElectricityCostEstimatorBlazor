@@ -9,7 +9,7 @@
 <div class="row">
     <div class="col-12">
         <div class="col-sm-12 col-md-9">
-            <label for="DeliveryProviderSelect" class="form-label">Provider</label>
+            <label for="DeliveryProviderSelect" class="form-label">Delivery Provider</label>
             <InputSelect id="DeliveryProviderSelect" TValue="int" Value="_providerId" ValueChanged="OnProviderChanged" ValueExpression="@(() => _providerId)" class="form-control col-sm-12 col-6">
                 <option value="0">- Add New Provider -</option>
                 @foreach(var provider in Providers)

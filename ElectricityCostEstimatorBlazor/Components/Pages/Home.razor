@@ -12,33 +12,40 @@
 
 <h1>Electricity Cost Estimator</h1>
 
-<div class="row border rounded">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Plan Name</th>
-                <th scope="col">Deliver Provider</th>
-                <th scope="col">Base Charge</th>
-                <th scope="col">Credit</th>
-                <th scope="col">Credit Minimum Usage</th>
-                <th scope="col">Cost Annually</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var estimate in Estimates)
-            {
-                <tr>
-                    <td>@estimate.ElectricityPlan?.Name</td>
-                    <td>@estimate.Delivery?.ProviderName</td>
-                    <td>@($"{estimate.ElectricityPlan?.BaseCharge:C2}")</td>
-                    <td>@($"{estimate.ElectricityPlan?.Credit:C2}")</td>
-                    <td>@estimate.ElectricityPlan?.CreditMinimumUsage</td>
-                    <td>@($"{estimate.GetAnnualTotal():C2}")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+@if (Estimates.Count < 0)
+{
+    <div class="row border rounded">
+       <table class="table table-striped">
+           <thead>
+               <tr>
+                   <th scope="col">Plan Name</th>
+                   <th scope="col">Deliver Provider</th>
+                   <th scope="col">Base Charge</th>
+                   <th scope="col">Credit</th>
+                   <th scope="col">Credit Minimum Usage</th>
+                   <th scope="col">Cost Annually</th>
+               </tr>
+           </thead>
+           <tbody>
+               @foreach (var estimate in Estimates)
+               {
+                   <tr>
+                       <td>@estimate.ElectricityPlan?.Name</td>
+                       <td>@estimate.Delivery?.ProviderName</td>
+                       <td>@($"{estimate.ElectricityPlan?.BaseCharge:C2}")</td>
+                       <td>@($"{estimate.ElectricityPlan?.Credit:C2}")</td>
+                       <td>@estimate.ElectricityPlan?.CreditMinimumUsage</td>
+                       <td>@($"{estimate.GetAnnualTotal():C2}")</td>
+                   </tr>
+               }
+           </tbody>
+       </table>
+    </div>
+}
+else
+{
+    <p>Add a new electricity plan to start.</p>
+}
 
 @code{
     [Parameter]

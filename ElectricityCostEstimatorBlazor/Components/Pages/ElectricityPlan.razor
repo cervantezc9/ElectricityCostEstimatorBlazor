@@ -111,13 +111,21 @@
 
     public async Task OnElectricityPlanSave(EditContext editContext)
     {
-        var planVieModel = (ElectricityPlanViewModel)editContext.Model;
+        var planViewModel = (ElectricityPlanViewModel)editContext.Model;
         var plan = _planId == 0 ? new Data.Models.ElectricityPlan()
         {
-            Name = planVieModel.Name,
-            BaseCharge = planVieModel.BaseCharge,
-            Credit = planVieModel.Credit,
-            CreditMinimumUsage = planVieModel.CreditMinimumUsage
+            Name = planViewModel.Name,
+            BaseCharge = planViewModel.BaseCharge,
+            Credit = planViewModel.Credit,
+            CreditMinimumUsage = planViewModel.CreditMinimumUsage,
+            ElectricityPlanRates = planViewModel.ElectricityPlanRates?.Select(rate => new Data.Models.ElectricityPlanRate
+            {
+                Rate = rate.Rate,
+                kWhMinimumUsage = rate.kWhMinimumUsage,
+                kWhMaximumUsage = rate.kWhMaximumUsage,
+                IsActive = true
+            }).ToList() ?? [],
+            IsActive = true
         } : null;
 
         if (plan != null)
