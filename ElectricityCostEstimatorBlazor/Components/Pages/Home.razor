@@ -12,7 +12,7 @@
 
 <h1>Electricity Cost Estimator</h1>
 
-@if (Estimates.Count < 0)
+@if (Estimates?.Count > 0)
 {
     <div class="row border rounded">
        <table class="table table-striped">
@@ -94,8 +94,8 @@ else
         }).ToList() ?? [];
     }
 
-    public async Task OnEstimateChanged(int id)
-    {
-        _estimateId = id;
-    }
+    // public async Task OnEstimateChanged(int id)
+    // {
+    //     _estimateId = id;
+    // }
 }
