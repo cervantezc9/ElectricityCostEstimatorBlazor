@@ -38,6 +38,7 @@ namespace ElectricityCostEstimatorBlazor.Services
                         .ThenInclude(plan => plan.ElectricityPlanRates)
                     .Include(est => est.Delivery)
                     .Include(est => est.MonthlyUsages)
+                    .Where(est => est.IsActive)
                     .OrderBy(est => est.Id).ToListAsync();
             }
 

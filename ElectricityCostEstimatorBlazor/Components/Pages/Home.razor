@@ -2,39 +2,107 @@
 
 @using ElectricityCostEstimatorBlazor.Services
 @using ElectricityCostEstimatorBlazor.ViewModels
+@using System.Threading.Tasks
 
 @inject ElectricityEstimatorService estimatorService;
+
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>Electricity Cost Estimator</h1>
 
-<div>
-    <label for="Estimate" class="col-sm-2">
-        Estimate
-    </label>
-    <div class="col-sm-4">
-        @* <InputSelect id="Estimate" @bind-Value="">
-
-        </InputSelect> *@
+@* <div class="row">
+    <div class="col-12">
+        <div class="col-sm-12 col-md-9">
+            <label for="DeliveryProviderSelect" class="form-label">Provider</label>
+            <InputSelect id="DeliveryProviderSelect" TValue="int" Value="_estimateId" ValueChanged="OnEstimateChanged" ValueExpression="@(() => _estimateId)" class="form-control col-sm-12 col-6">
+                @foreach (var estimate in Estimates)
+                {
+                    <option value="@estimate.Id">@estimate.Description</option>
+                }
+            </InputSelect>
+        </div>
     </div>
+</div> *@
+
+<div class="row">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Deliver Provider</th>
+                <th scope="col">Plan Name</th>
+                <th scope="col">Base Charge</th>
+                <th scope="col">Credit</th>
+                <th scope="col">Credit Minimum Usage</th>
+                <th scope="col">Cost Annually</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var estimate in Estimates)
+            {
+                <tr>
+                    <td>@estimate.ElectricityPlan?.Name</td>
+                    <td>@estimate.Delivery?.ProviderName</td>
+                    <td>@($"{estimate.ElectricityPlan?.BaseCharge:C2}")</td>
+                    <td>@($"{estimate.ElectricityPlan?.Credit:C2}")</td>
+                    <td>@estimate.ElectricityPlan?.CreditMinimumUsage</td>
+                    <td>@($"{estimate.GetAnnualTotal():C2}")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 
 @code{
-    private int _estimateId = 0;
+    [Parameter]
+    public int EstimateId { get; set; }
+
+    private int _estimateId { get; set; } = 0;
     private EstimateViewModel Estimate { get; set; } = new();
-    private List<EstimateViewModel> Estimates { get; set; }
+    private List<EstimateViewModel> Estimates { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
-        // Estimates = await estimatorService.GetAllEstimates().Result.Select(estimate => new EstimateViewModel()
-        // {
-        //     Id = estimate.Id,
-        //     Delivery = new()
-        //     {
-        //         ProviderName = estimate.Delivery?.ProviderName
-        //     }
+        _estimateId = EstimateId;
 
-        // });
+        var dbEstimates = await estimatorService.GetAllEstimates();
+        Estimates = dbEstimates?.Select(est => new EstimateViewModel()
+        {
+            Id = est.Id,
+            ElectricityPlan = new()
+            {
+                Id = est.ElectricityPlan.Id,
+                Name = est.ElectricityPlan.Name,
+                BaseCharge = est.ElectricityPlan.BaseCharge,
+                Credit = est.ElectricityPlan.Credit,
+                CreditMinimumUsage = est.ElectricityPlan.CreditMinimumUsage,
+                ElectricityPlanRates = est.ElectricityPlan.ElectricityPlanRates?.Select(rate => new ElectricityPlanRate()
+                {
+                    Id = rate.Id,
+                    Rate = rate.Rate,
+                    kWhMinimumUsage = rate.kWhMinimumUsage,
+                    kWhMaximumUsage = rate.kWhMaximumUsage
+                }).ToList() ?? []
+            },
+            Delivery = new()
+            {
+                Id = est.Delivery.Id,
+                ProviderName = est.Delivery.ProviderName,
+                MonthlyCharge = est.Delivery.MonthlyCharge,
+                KWhCharge = est.Delivery.KWhCharge
+            },
+            MonthlyUsages = est.MonthlyUsages?.Select(usage => new ViewModels.MonthlyUsage()
+            {
+                Id = usage.Id,
+                Month = (int)usage.Month,
+                Usage = usage.Usage
+            }).ToList() ?? []
+        }).ToList() ?? [];
+    }
+
+    public async Task OnEstimateChanged(int id)
+    {
+        _estimateId = id;
     }
 }
