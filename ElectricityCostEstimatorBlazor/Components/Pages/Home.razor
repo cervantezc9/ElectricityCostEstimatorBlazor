@@ -12,26 +12,12 @@
 
 <h1>Electricity Cost Estimator</h1>
 
-@* <div class="row">
-    <div class="col-12">
-        <div class="col-sm-12 col-md-9">
-            <label for="DeliveryProviderSelect" class="form-label">Provider</label>
-            <InputSelect id="DeliveryProviderSelect" TValue="int" Value="_estimateId" ValueChanged="OnEstimateChanged" ValueExpression="@(() => _estimateId)" class="form-control col-sm-12 col-6">
-                @foreach (var estimate in Estimates)
-                {
-                    <option value="@estimate.Id">@estimate.Description</option>
-                }
-            </InputSelect>
-        </div>
-    </div>
-</div> *@
-
 <div class="row">
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="col">Deliver Provider</th>
                 <th scope="col">Plan Name</th>
+                <th scope="col">Deliver Provider</th>
                 <th scope="col">Base Charge</th>
                 <th scope="col">Credit</th>
                 <th scope="col">Credit Minimum Usage</th>

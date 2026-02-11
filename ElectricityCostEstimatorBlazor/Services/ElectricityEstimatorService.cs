@@ -66,16 +66,7 @@ namespace ElectricityCostEstimatorBlazor.Services
 
             return estimate;
         }
-
-        //public async Task UpdateEstimate(Estimate estimate)
-        //{
-        //    using (var context = _dbContextFactory.CreateDbContext())
-        //    {
-        //        context.Estimates.Update(estimate);
-        //        await context.SaveChangesAsync();
-        //    }
-        //}
-
+        
         #endregion
 
         #region DeliveryProvider
@@ -172,27 +163,6 @@ namespace ElectricityCostEstimatorBlazor.Services
 
 
         #endregion
-
-        //#region Electricity Plan Rate
-
-        //public async Task<List<ElectricityPlanRate>> GetElectricityPlanRateByPlanId(int electricityPlanId)
-        //{
-        //    if (electricityPlanRateId == 0)
-        //    {
-        //        return null;
-        //    }
-
-        //    List<ElectricityPlanRate> rates;
-
-        //    using (var context = _dbContextFactory.CreateDbContext())
-        //    {
-        //        rates = await context.ElectricityPlanRates.Where(rate => rate.ElectricityPlanId == electricityPlanRateId).ToListAsync();
-        //    }
-
-        //    return rates;
-        //}
-
-        //#endregion
 
         #region MonthlyUsage
 
