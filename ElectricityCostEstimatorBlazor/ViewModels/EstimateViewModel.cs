@@ -39,7 +39,7 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
             double delvieryCharge = Delivery?.MonthlyCharge ?? 0;
             MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == (int)month);
 
-            delvieryCharge += (Delivery?.KWhCharge ?? 0) * (monthlyUsage?.Usage ?? 0);
+            delvieryCharge += ((Delivery?.KWhCharge / 100) ?? 0) * (monthlyUsage?.Usage ?? 0);
 
             return delvieryCharge;
         }
@@ -85,7 +85,7 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
 
             if (usage > 0)
             {
-                charge += (rate.Rate) * usage;
+                charge += ((rate.Rate) / 100) * usage;
             }
 
             return charge;

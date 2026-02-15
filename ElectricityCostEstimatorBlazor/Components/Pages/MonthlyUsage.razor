@@ -6,8 +6,10 @@
 
 @inject ElectricityEstimatorService estimatorService;
 
+<h4>Monthly Usage</h4>
+
 <div class="col-12 ">
-    <label class="form-label">Monthly Usages (kWh)</label>
+    <label class="form-label">Usages (kWh)</label>
     <EditForm Model="@UsagesViewModel" class="col-12" OnValidSubmit="@OnMonthlyUsageSave">
         <fieldset>
             <DataAnnotationsValidator></DataAnnotationsValidator>
