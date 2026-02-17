@@ -8,25 +8,30 @@
 
 <h4>Monthly Usage</h4>
 
-<div class="col-12 ">
-    <label class="form-label">Usages (kWh)</label>
-    <EditForm Model="@UsagesViewModel" class="col-12" OnValidSubmit="@OnMonthlyUsageSave">
-        <fieldset>
-            <DataAnnotationsValidator></DataAnnotationsValidator>
-            <div class="container">
-                <div class="row row-cols-3 border rounded">
-                    @foreach(var usage in UsagesViewModel.MonthlyUsages)
-                    {
-                        <div class="col col-sm-12 col-md-3 m-3">
-                            <label for="@($"MonthlyUsage-{usage.Id}")" class="form-label">@(((Month)usage.Month).ToString())</label><br />
-                            <InputNumber id="@($"MonthlyUsage-{usage.Id}")" class="form-control" @bind-Value="@usage.Usage"></InputNumber>
+<div class="container mb-3 p-3 border rounded col-12">
+    <div class="row">
+        <div class="col-12 ">
+            <label class="form-label">Usages (kWh)</label>
+            <EditForm Model="@UsagesViewModel" class="col-12" OnValidSubmit="@OnMonthlyUsageSave">
+                <fieldset>
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                    <div class="container">
+                        <div class="row row-cols-3 border rounded">
+                            @foreach(var usage in UsagesViewModel.MonthlyUsages)
+                            {
+                                <div class="col col-sm-12 col-md-3 m-3">
+                                    <label for="@($"MonthlyUsage-{usage.Id}")" class="form-label">@(((Month)usage.Month).ToString())</label><br />
+                                    <InputNumber id="@($"MonthlyUsage-{usage.Id}")" class="form-control" @bind-Value="@usage.Usage"></InputNumber>
+                                    <ValidationMessage For="@(() => usage.Usage)"></ValidationMessage>
+                                </div>
+                            }
                         </div>
-                    }
-                </div>
-                <button type="submit" class="m-3 btn btn-primary">Save</button>
-            </div>
-        </fieldset>
-    </EditForm>
+                        <button type="submit" class="mt-3 btn btn-primary">Save</button>
+                    </div>
+                </fieldset>
+            </EditForm>
+        </div>
+    </div>
 </div>
 
 @code {

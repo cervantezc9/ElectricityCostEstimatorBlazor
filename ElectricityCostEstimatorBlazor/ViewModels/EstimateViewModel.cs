@@ -19,11 +19,6 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
             this.MonthlyUsages = new List<MonthlyUsage>();
         }
 
-        public double GetChargeTotal(Month month)
-        {
-            return GetDeliveryCharge(month) + GetUsageCharge(month) - GetCredit(month);
-        }
-
         public double GetAnnualTotal()
         {
             AnnualTotal = 0;
@@ -34,6 +29,11 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
             return AnnualTotal;
         }
 
+        public double GetChargeTotal(Month month)
+        {
+            return GetDeliveryCharge(month) + GetUsageCharge(month) - GetCredit(month);
+        }
+
         public double GetDeliveryCharge(Month month)
         {
             double delvieryCharge = Delivery?.MonthlyCharge ?? 0;
@@ -42,19 +42,6 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
             delvieryCharge += ((Delivery?.KWhCharge / 100) ?? 0) * (monthlyUsage?.Usage ?? 0);
 
             return delvieryCharge;
-        }
-
-        public double GetCredit(Month month)
-        {
-            double credit = 0;
-            MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == (int)month);
-
-            if ((monthlyUsage?.Usage ?? 0) >= (ElectricityPlan?.CreditMinimumUsage ?? 0))
-            {
-                credit = ElectricityPlan?.Credit ?? 0;
-            }
-
-            return credit;
         }
 
         public double GetUsageCharge(Month month)
@@ -77,6 +64,19 @@ namespace ElectricityCostEstimatorBlazor.ViewModels
                 }
             }
             return charge;
+        }
+
+        public double GetCredit(Month month)
+        {
+            double credit = 0;
+            MonthlyUsage monthlyUsage = MonthlyUsages.FirstOrDefault(x => x.Month == (int)month);
+
+            if ((monthlyUsage?.Usage ?? 0) >= (ElectricityPlan?.CreditMinimumUsage ?? 0))
+            {
+                credit = ElectricityPlan?.Credit ?? 0;
+            }
+
+            return credit;
         }
 
         private double GetRateTierChage(ElectricityPlanRate rate, int usage)
