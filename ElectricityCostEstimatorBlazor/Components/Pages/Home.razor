@@ -3,6 +3,7 @@
 @using ElectricityCostEstimatorBlazor.Services
 @using ElectricityCostEstimatorBlazor.ViewModels
 @using System.Threading.Tasks
+@using Microsoft.AspNetCore.Components.QuickGrid
 
 @inject ElectricityEstimatorService estimatorService;
 
@@ -14,32 +15,17 @@
 
 @if (Estimates?.Count > 0)
 {
-    <div class="row border rounded">
-       <table class="table table-striped">
-           <thead>
-               <tr>
-                   <th scope="col">Plan Name</th>
-                   <th scope="col">Deliver Provider</th>
-                   <th scope="col">Base Charge</th>
-                   <th scope="col">Credit</th>
-                   <th scope="col">Credit Min Usage</th>
-                   <th scope="col">Annual Cost</th>
-               </tr>
-           </thead>
-           <tbody>
-               @foreach (var estimate in Estimates)
-               {
-                   <tr>
-                       <td>@estimate.ElectricityPlan?.Name</td>
-                       <td>@estimate.Delivery?.ProviderName</td>
-                       <td>@($"{estimate.ElectricityPlan?.BaseCharge:C2}")</td>
-                       <td>@($"{estimate.ElectricityPlan?.Credit:C2}")</td>
-                       <td>@estimate.ElectricityPlan?.CreditMinimumUsage</td>
-                       <td>@($"{estimate.GetAnnualTotal():C2}")</td>
-                   </tr>
-               }
-           </tbody>
-       </table>
+    <div class="container border rounded p-3 pb-0 col-12" style="overflow:auto">
+        <QuickGrid Class="table table-striped border rounded"
+                Items="@Estimates.AsQueryable()"
+                ItemKey="@(est => est.Id)">
+            <PropertyColumn Title="Plan Name" Property="@(est => est.ElectricityPlan.Name)" Sortable="true"></PropertyColumn>
+            <PropertyColumn Title="Base Charge" Property="@(est => est.ElectricityPlan.BaseCharge)" Sortable="true" Format="C2"></PropertyColumn>
+            <PropertyColumn Title="Credit" Property="@(est => est.ElectricityPlan.Credit)" Sortable="true" Format="C2"></PropertyColumn>
+            <PropertyColumn Title="Credit Min Usage" Property="@(est => est.ElectricityPlan.CreditMinimumUsage)" Sortable="true"></PropertyColumn>
+            <PropertyColumn Title="Delivery Provider" Property="@(est => est.Delivery.ProviderName)" Sortable="true"></PropertyColumn>
+            <PropertyColumn Title="Annual Cost" Property="@(est => est.GetAnnualTotal())" Sortable="true" Format="C2"></PropertyColumn>
+        </QuickGrid>
     </div>
 }
 else
