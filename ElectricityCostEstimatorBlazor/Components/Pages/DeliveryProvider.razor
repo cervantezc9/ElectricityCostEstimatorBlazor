@@ -15,7 +15,7 @@
                 <label for="DeliveryProviderSelect" class="form-label">Delivery Provider</label>
                 <InputSelect id="DeliveryProviderSelect" TValue="int" Value="_providerId" ValueChanged="OnProviderChanged" ValueExpression="@(() => _providerId)" class="form-control col-sm-12 col-6">
                     <option value="0">- Add New Provider -</option>
-                    @foreach(var provider in Providers)
+                    @foreach (var provider in Providers)
                     {
                         <option value="@provider.Id">@provider.Description</option>
                     }
@@ -23,26 +23,27 @@
             </div>
         </div>
     </div>
-    
+
     <div class="mt-3 col-sm-12 col-md-9 border rounded">
         <EditForm Model="@Provider" OnValidSubmit="@OnSave">
             <fieldset disabled="@IsProviderDiabled">
                 <DataAnnotationsValidator></DataAnnotationsValidator>
-
-                <div class="col-sm-12 m-3 col-md-10">
-                    <label for="DeliveryProviderName" class="form-label">Name</label><br />
-                    <InputText id="DeliveryProviderName" class="form-control" @bind-Value="@Provider.ProviderName"></InputText>
-                    <ValidationMessage For="@(() => Provider.ProviderName)"></ValidationMessage>
-                </div>
-                <div class="col-sm-12 m-3 col-md-6">
-                    <label for="DeliveryProviderMonthlyCharge" class="form-label">Monthly Charge ($)</label><br />
-                    <InputNumber id="DeliveryProviderMonthlyCharge" class="form-control col-sm-12 col-5" step="0.01" @bind-Value="@Provider.MonthlyCharge" @bind-Value:format="F2"></InputNumber>
-                    <ValidationMessage For="@(() => Provider.MonthlyCharge)"></ValidationMessage>
-                </div>
-                <div class="col-sm-12 m-3 col-md-6">
-                    <label for="DeliveryProviderKWhCharge" class="form-label">kWh Charge (¢ / kWh)</label><br />
-                    <InputNumber id="DeliveryProviderKWhCharge" class="form-control col-sm-12 col-5" step="0.00001" @bind-Value="@Provider.KWhCharge" @bind-Value:format="F5"></InputNumber>
-                    <ValidationMessage For="@(() => Provider.KWhCharge)"></ValidationMessage>
+                <div class="container">
+                    <div class="col-sm-11 m-3 col-md-10">
+                        <label for="DeliveryProviderName" class="form-label">Name</label><br />
+                        <InputText id="DeliveryProviderName" class="form-control" @bind-Value="@Provider.ProviderName"></InputText>
+                        <ValidationMessage For="@(() => Provider.ProviderName)"></ValidationMessage>
+                    </div>
+                    <div class="col-sm-11 m-3 col-md-6">
+                        <label for="DeliveryProviderMonthlyCharge" class="form-label">Monthly Charge ($)</label><br />
+                        <InputNumber id="DeliveryProviderMonthlyCharge" class="form-control col-sm-12 col-5" step="0.01" @bind-Value="@Provider.MonthlyCharge" @bind-Value:format="F2"></InputNumber>
+                        <ValidationMessage For="@(() => Provider.MonthlyCharge)"></ValidationMessage>
+                    </div>
+                    <div class="col-sm-11 m-3 col-md-6">
+                        <label for="DeliveryProviderKWhCharge" class="form-label">kWh Charge (¢ / kWh)</label><br />
+                        <InputNumber id="DeliveryProviderKWhCharge" class="form-control col-sm-12 col-5" step="0.00001" @bind-Value="@Provider.KWhCharge" @bind-Value:format="F5"></InputNumber>
+                        <ValidationMessage For="@(() => Provider.KWhCharge)"></ValidationMessage>
+                    </div>
                 </div>
                 <button type="submit" hidden="@IsProviderDiabled" class="ms-3 mb-3 @(IsProviderDiabled ? "btn" : "btn btn-primary")">Save</button>
             </fieldset>
@@ -58,7 +59,7 @@
     private int _providerId = 0;
     private List<DeliveryProviderViewModel> Providers { get; set; } = [];
     private DeliveryProviderViewModel Provider { get; set; } = new();
-    private bool IsProviderDiabled => _providerId != 0; 
+    private bool IsProviderDiabled => _providerId != 0;
 
     [Parameter]
     public EventCallback<object> OnNextClick { get; set; }
