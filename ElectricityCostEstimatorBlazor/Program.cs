@@ -16,6 +16,14 @@ builder.Services.AddTransient<ElectricityEstimatorService>();
 
 var app = builder.Build();
 
+// Seed the database on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    await SeedData.InitializeAsync(services); // The Initialize method would contain the logic
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
